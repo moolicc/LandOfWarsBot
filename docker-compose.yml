@@ -1,0 +1,13 @@
+services:
+  discord-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: discord_bot
+    restart: unless-stopped
+    environment:
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN:-YOUR_DEFAULT_TOKEN_HERE}
+      - DB_PATH=${DB_PATH:-/app/data/landsofwar.db}
+    volumes:
+      # Maps your host folder /data/db to the container's /app/data
+      - /data/db:/app/data
