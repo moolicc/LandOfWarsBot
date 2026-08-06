@@ -45,7 +45,7 @@ func (e BuildingCompletedEvent) CheckEvent(db *sql.DB, forUser int32, cursor tim
 
 	actions, err := getActionsForUser(db, forUser, cursor.Unix())
 	if err != nil {
-		println("Error getting actions for user", forUser, ":", err)
+		println("Error getting actions for user", forUser, ":", err.Error())
 		return false, discordgo.MessageEmbed{}
 	}
 
@@ -61,7 +61,7 @@ func (e BuildingCompletedEvent) CheckEvent(db *sql.DB, forUser int32, cursor tim
 		if wasNotifSent || err != nil {
 			println("...Notification already sent for action (otherid:", action.id, ", name:", e.Name(), ", user:", forUser, ")")
 			if err != nil {
-				println("Error checking if notification was sent for action", action.id, ":", err)
+				println("Error checking if notification was sent for action", action.id, ":", err.Error())
 			}
 			continue
 		}
@@ -70,7 +70,7 @@ func (e BuildingCompletedEvent) CheckEvent(db *sql.DB, forUser int32, cursor tim
 		var resultData map[string]interface{}
 		err = json.Unmarshal([]byte(action.result.String), &resultData)
 		if err != nil {
-			println("Error parsing result JSON for action", action.id, ":", err)
+			println("Error parsing result JSON for action", action.id, ":", err.Error())
 			continue
 		}
 
@@ -88,7 +88,7 @@ func (e BuildingCompletedEvent) CheckEvent(db *sql.DB, forUser int32, cursor tim
 		// Find the town the building was constructed in.
 		town, err := getTown(db, int32(action.town_id.Int64))
 		if err != nil {
-			println("Error getting town for action", action.id, ":", err)
+			println("Error getting town for action", action.id, ":", err.Error())
 			buildingsInTowns = append(buildingsInTowns, fmt.Sprintf(" * **%s** (Level %d)", buildingType, int(level)))
 			continue
 		}
@@ -135,7 +135,7 @@ func (e BuildingCompletedEvent) CheckEvent(db *sql.DB, forUser int32, cursor tim
 			{
 				Name:   "",
 				Value:  strings.Join(buildingsInTowns, "\n"),
-				Inline: false,
+				Inline: true,
 			},
 		},
 		Author: &discordgo.MessageEmbedAuthor{
@@ -176,7 +176,7 @@ func (e AttackStartedEvent) CheckEvent(db *sql.DB, forUser int32, cursor time.Ti
 	// Find the user's towns.
 	towns, err := getTowns(db, forUser)
 	if err != nil {
-		println("Error getting towns for user for attack_march event", forUser, ":", err)
+		println("Error getting towns for user for attack_march event", forUser, ":", err.Error())
 		return false, discordgo.MessageEmbed{}
 	}
 
@@ -199,13 +199,13 @@ func (e AttackStartedEvent) CheckEvent(db *sql.DB, forUser int32, cursor time.Ti
 	rows, err := db.Query(query, cursor.Unix(), time.Now().UTC().Unix(), townIdsFormatted)
 
 	if err != nil {
-		println("Error querying for attack_march actions for user", forUser, ":", err)
+		println("Error querying for attack_march actions for user", forUser, ":", err.Error())
 		return false, discordgo.MessageEmbed{}
 	}
 
 	actions, err := createActions(rows)
 	if err != nil {
-		println("Error creating actions for attack_march actions for user", forUser, ":", err)
+		println("Error creating actions for attack_march actions for user", forUser, ":", err.Error())
 		return false, discordgo.MessageEmbed{}
 	}
 	if len(actions) == 0 {
@@ -225,7 +225,7 @@ func (e AttackStartedEvent) CheckEvent(db *sql.DB, forUser int32, cursor time.Ti
 		if wasNotifSent || err != nil {
 			println("...Notification already sent for action (otherid:", action.id, ", name:", e.Name(), ", user:", forUser, ")")
 			if err != nil {
-				println("Error checking if notification was sent for action", action.id, ":", err)
+				println("Error checking if notification was sent for action", action.id, ":", err.Error())
 			}
 			continue
 		}
@@ -234,14 +234,14 @@ func (e AttackStartedEvent) CheckEvent(db *sql.DB, forUser int32, cursor time.Ti
 		var resultData map[string]interface{}
 		err = json.Unmarshal([]byte(action.data.String), &resultData)
 		if err != nil {
-			println("Error parsing result JSON for action", action.id, ":", err)
+			println("Error parsing result JSON for action", action.id, ":", err.Error())
 			continue
 		}
 
 		// Find the realm and attacking player names.
 		playerAndRealm, err := getPlayerAndRealm(db, action.player_id)
 		if err != nil {
-			println("Error getting player and realm for action", action.id, " and for player", action.player_id, ":", err)
+			println("Error getting player and realm for action", action.id, " and for player", action.player_id, ":", err.Error())
 			continue
 		}
 

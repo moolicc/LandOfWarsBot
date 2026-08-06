@@ -110,7 +110,7 @@ func checkEvents(db *sql.DB) []UserNotification {
 	for _, eventType := range eventTypes {
 		usersToNotify, err := getUsersToNotify(db, eventType.SettingKey())
 		if err != nil {
-			log.Println("Error getting users to notify for event type", eventType.Name(), ":", err)
+			log.Println("Error getting users to notify for event type", eventType.Name(), ":", err.Error())
 			continue
 		}
 
@@ -152,7 +152,7 @@ func sendMessages(dg *discordgo.Session, messages []UserNotification) {
 			println("...Creating DM channel for user: ", message.user.id, "discord id: ", message.user.discord_id, "for event notification", message.message.Title)
 			channel, err := dg.UserChannelCreate(message.user.discord_id)
 			if err != nil {
-				log.Println("Error creating DM channel for user", message.user.discord_id, ":", err)
+				log.Println("Error creating DM channel for user", message.user.discord_id, ":", err.Error())
 				continue
 			}
 			channelMap[message.user.discord_id] = channel.ID
@@ -170,7 +170,7 @@ func sendMessages(dg *discordgo.Session, messages []UserNotification) {
 		verifyMessageLength(userMessages)
 		_, err := dg.ChannelMessageSendEmbeds(channelId, userMessages)
 		if err != nil {
-			log.Println("Error sending message to user", internalUserId, ":", err)
+			log.Println("Error sending message to user", internalUserId, ":", err.Error())
 		}
 	}
 }

@@ -66,7 +66,7 @@ func getActionsForUser(db *sql.DB, userID int32, cursor int64) ([]action, error)
 
 	rows, err := db.Query(query, userID, cursor)
 	if err != nil {
-		println("Error querying for actions for user", userID, ":", err)
+		println("Error querying for actions for user", userID, ":", err.Error())
 		return nil, err
 	}
 	defer rows.Close()
@@ -76,7 +76,7 @@ func getActionsForUser(db *sql.DB, userID int32, cursor int64) ([]action, error)
 		var a action
 		err := rows.Scan(&a.id, &a.player_id, &a.town_id, &a.action_type, &a.data, &a.status, &a.started_at, &a.completes_at, &a.completed_at, &a.result)
 		if err != nil {
-			println("Error scanning action row for user", userID, ":", err)
+			println("Error scanning action row for user", userID, ":", err.Error())
 			return nil, err
 		}
 		actions = append(actions, a)
@@ -106,7 +106,7 @@ func getTown(db *sql.DB, townID int32) (town, error) {
 	rows, err := db.Query(query, townID)
 
 	if err != nil {
-		println("Error querying for town with ID", townID, ":", err)
+		println("Error querying for town with ID", townID, ":", err.Error())
 		return town{}, err
 	}
 	defer rows.Close()
@@ -116,7 +116,7 @@ func getTown(db *sql.DB, townID int32) (town, error) {
 		var t town
 		err := rows.Scan(&t.id, &t.player_id, &t.name, &t.x, &t.y, &t.population, &t.gold, &t.food, &t.wood, &t.stone, &t.iron, &t.last_resource_tick, &t.created_at, &t.morale, &t.town_type, &t.country_id)
 		if err != nil {
-			println("Error scanning town row for town with ID", townID, ":", err)
+			println("Error scanning town row for town with ID", townID, ":", err.Error())
 			return town{}, err
 		}
 
@@ -135,7 +135,7 @@ func getTowns(db *sql.DB, userID int32) ([]town, error) {
 	select * from towns where player_id = ?;`
 	rows, err := db.Query(query, userID)
 	if err != nil {
-		println("Error querying for towns for user with ID", userID, ":", err)
+		println("Error querying for towns for user with ID", userID, ":", err.Error())
 		return nil, err
 	}
 	defer rows.Close()
@@ -159,7 +159,7 @@ func getPlayer(db *sql.DB, playerID int32) (player, error) {
 	rows, err := db.Query(query, playerID)
 
 	if err != nil {
-		println("Error querying for player with ID", playerID, ":", err)
+		println("Error querying for player with ID", playerID, ":", err.Error())
 		return player{}, err
 	}
 	defer rows.Close()
@@ -167,7 +167,7 @@ func getPlayer(db *sql.DB, playerID int32) (player, error) {
 	var p player
 	err = rows.Scan(&p.id, &p.discord_id, &p.username, &p.avatar_url, &p.country_id, &p.realm_id)
 	if err != nil {
-		println("Error scanning player row for player with ID", playerID, ":", err)
+		println("Error scanning player row for player with ID", playerID, ":", err.Error())
 		return player{}, err
 	}
 	return p, nil
@@ -180,7 +180,7 @@ func getPlayerAndRealm(db *sql.DB, playerID int32) (playerWithRealm, error) {
 
 	rows, err := db.Query(query, playerID)
 	if err != nil {
-		println("Error querying for player and town with ID", playerID, ":", err)
+		println("Error querying for player and town with ID", playerID, ":", err.Error())
 		return playerWithRealm{}, err
 	}
 	defer rows.Close()
