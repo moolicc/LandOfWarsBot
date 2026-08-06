@@ -24,6 +24,9 @@ func createTempTable(db *sql.DB) error {
         );`
 
 	_, err := db.Exec(tempTable)
+	if err != nil {
+		println("Error creating temporary table 'notifs_sent':", err.Error())
+	}
 	return err
 }
 
@@ -34,6 +37,9 @@ func markNotifSent(db *sql.DB, otherID int64, eventType string, playerID int32) 
 		ON CONFLICT(other_id, event_type, player_id) DO NOTHING;`
 
 	_, err := db.Exec(query, otherID, eventType, playerID)
+	if err != nil {
+		println("Error marking notification as sent for otherID", otherID, "eventType", eventType, "playerID", playerID, ":", err.Error())
+	}
 	return err
 }
 
@@ -45,6 +51,7 @@ func hasNotifBeenSent(db *sql.DB, otherID int64, eventType string, playerID int3
 	err := db.QueryRow(query, otherID, eventType, playerID).Scan(&exists)
 
 	if err != nil {
+		println("Error checking if notification has been sent for otherID", otherID, "eventType", eventType, "playerID", playerID, ":", err.Error())
 		return false, err
 	}
 
@@ -57,6 +64,9 @@ func purgeOldNotifs(db *sql.DB) error {
 		DELETE FROM notifs_sent
 		WHERE created_at < datetime('now', ?);`
 	_, err := db.Exec(query, modifier)
+	if err != nil {
+		println("Error purging old notifications from 'notifs_sent':", err.Error())
+	}
 	return err
 }
 
@@ -67,6 +77,7 @@ func dumpNotifsSent(db *sql.DB) {
 	query := fmt.Sprintf("SELECT * FROM %s", tableName)
 	rows, err := db.Query(query)
 	if err != nil {
+		println("Error querying table", tableName, ":", err.Error())
 		return
 	}
 	defer rows.Close()
@@ -74,6 +85,7 @@ func dumpNotifsSent(db *sql.DB) {
 	// 2. Get column names dynamically
 	columns, err := rows.Columns()
 	if err != nil {
+		println("Error getting column names for table", tableName, ":", err.Error())
 		return
 	}
 
@@ -94,6 +106,7 @@ func dumpNotifsSent(db *sql.DB) {
 		rowCount++
 		err := rows.Scan(valuePtrs...)
 		if err != nil {
+			println("Error scanning row", rowCount, "for table", tableName, ":", err.Error())
 			return
 		}
 
@@ -115,6 +128,7 @@ func dumpNotifsSent(db *sql.DB) {
 	}
 
 	if err = rows.Err(); err != nil {
+		println("Error iterating through rows for table", tableName, ":", err.Error())
 		return
 	}
 
@@ -129,6 +143,7 @@ func getUsersToNotify(db *sql.DB, eventType string) ([]User, error) {
 
 	rows, err := db.Query(query, eventType, MASTER_SETTING_KEY)
 	if err != nil {
+		println("Error querying for users to notify for event type", eventType, ":", err.Error())
 		return nil, err
 	}
 	defer rows.Close()
@@ -139,6 +154,7 @@ func getUsersToNotify(db *sql.DB, eventType string) ([]User, error) {
 		var discordID string
 		err := rows.Scan(&userID, &discordID)
 		if err != nil {
+			println("Error scanning user row for event type", eventType, ":", err.Error())
 			return nil, err
 		}
 		users = append(users, User{id: userID, discord_id: discordID})
